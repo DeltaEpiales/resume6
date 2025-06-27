@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ryan Kamosa | Quantum Core v2.0</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Core Styling & Theme --- */
+        :root {
+            --pitch-black: #0A0A0A;
+            --quantum-blue: #00F6FF;
+            --magenta-pink: #FF00FF;
+            --off-white: #EAEAEA;
+            --dark-grey: #1a1a1a;
+            --transition-speed: 0.4s;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--pitch-black);
+            color: var(--off-white);
+            font-family: 'Fira Code', monospace;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        #background-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2;
+        }
+
+        .section {
+            min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 100px 5vw;
+            position: relative; width: 100%; overflow: hidden;
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--quantum-blue);
+            margin-bottom: 50px;
+            align-self: flex-start;
+            text-shadow: 0 0 10px var(--quantum-blue);
+            white-space: nowrap;
+        }
+
+        /* --- Hero Section & Boot Animation --- */
+        #hero { text-align: left; padding: 20px; }
+        .boot-container { width: 100%; max-width: 1000px; }
+        #ascii-art {
+            font-family: monospace; white-space: pre; color: var(--quantum-blue);
+            text-shadow: 0 0 5px var(--quantum-blue);
+            font-size: clamp(4px, 1.2vw, 10px);
+            opacity: 0; transition: opacity 1s; line-height: 1.1;
+        }
+        #boot-log { min-height: 150px; font-size: clamp(0.8rem, 1.5vw, 1rem); }
+        .boot-log-entry span { color: var(--quantum-blue); text-shadow: 0 0 5px var(--quantum-blue); }
+        .boot-log-entry .progress-bar { display: inline-block; color: var(--magenta-pink); }
+        #superposition-state {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            margin-top: 10px;
+            color: var(--off-white);
+            min-height: 1.5em;
+        }
+        #superposition-state span { color: var(--magenta-pink); text-shadow: 0 0 5px var(--magenta-pink); font-weight: bold; }
+        #deobfuscate-container { opacity: 0; transition: opacity 1s ease 1s; }
+        #deobfuscate-text {
+            font-size: clamp(1rem, 2vw, 1.2rem); color: var(--off-white);
+            max-width: 800px; line-height: 1.6; min-height: 150px;
+        }
+        #scroll-indicator {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            color: var(--quantum-blue); font-size: 2rem; opacity: 0;
+            animation: pulse 2s infinite, fadeIn 1s 5s forwards;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, 0) scale(1); opacity: 0.7; }
+            50% { transform: translate(-50%, 10px) scale(1.1); opacity: 1; }
+        }
+        @keyframes fadeIn { to { opacity: 0.7; } }
+        
+        /* --- Skills Section --- */
+        .skills-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px; width: 100%; max-width: 1200px; position: relative;
+        }
+        .skill-card {
+            background-color: rgba(10, 10, 10, 0.5); border: 1px solid var(--dark-grey);
+            backdrop-filter: blur(5px); padding: 30px 20px; text-align: center;
+            transition: all var(--transition-speed) ease; position: relative; overflow: hidden;
+            cursor: pointer;
+        }
+        .skill-card.active-filter {
+            border-color: var(--magenta-pink);
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.5);
+            transform: translateY(-10px) scale(1.02);
+        }
+        .skill-card:not(.active-filter):hover { transform: translateY(-10px) scale(1.02); border-color: var(--quantum-blue); box-shadow: 0 0 30px rgba(0, 246, 255, 0.3); }
+        .skill-card-quantum { grid-column: 1 / -1; padding: 40px 20px; }
+        @media (min-width: 768px) { .skill-card-quantum { grid-column: 2 / 3; grid-row: 1 / 3; } }
+        .skill-icon { font-size: 3rem; margin-bottom: 15px; color: var(--quantum-blue); transition: color var(--transition-speed) ease; }
+        .skill-card h3 { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; margin-bottom: 10px; }
+        #bloch-canvas { width: 150px; height: 150px; margin: 0 auto 15px; cursor: grab; }
+
+        /* --- Projects Section --- */
+        .projects-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px; width: 100%; max-width: 1400px;
+        }
+        .project-card {
+            background: var(--dark-grey); border: 1px solid #222;
+            padding: 25px; display: flex; flex-direction: column;
+            transition: all var(--transition-speed) ease; position: relative;
+            transform-style: preserve-3d;
+        }
+        .project-card.filtered-out { opacity: 0.3; filter: grayscale(80%); }
+        .project-card-schrodinger {
+             grid-column: 1 / -1; /* Makes it span full width */
+             border-color: var(--magenta-pink);
+        }
+        .project-card-visual {
+            height: 200px; background-color: var(--pitch-black); margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; position: relative; border: 1px solid #333;
+        }
+        #schrodinger-canvas { width: 100%; height: 100%; }
+        .project-card h3 { font-family: 'Orbitron', sans-serif; color: var(--quantum-blue); }
+        .project-card-schrodinger h3 { color: var(--magenta-pink); }
+        .project-card p { margin: 10px 0 20px; flex-grow: 1; }
+        .project-button {
+            background: transparent; border: 1px solid var(--quantum-blue); color: var(--quantum-blue);
+            padding: 10px 15px; font-family: 'Fira Code', monospace;
+            cursor: pointer; transition: all var(--transition-speed) ease; align-self: flex-start;
+        }
+        .project-button:hover { background: var(--quantum-blue); color: var(--pitch-black); box-shadow: 0 0 15px var(--quantum-blue); }
+        .project-card-schrodinger .project-button { border-color: var(--magenta-pink); color: var(--magenta-pink); }
+        .project-card-schrodinger .project-button:hover { background: var(--magenta-pink); color: var(--pitch-black); box-shadow: 0 0 15px var(--magenta-pink); }
+        
+        /* --- Modal --- */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; visibility: hidden;
+            transition: all var(--transition-speed) ease; backdrop-filter: blur(10px);
+        }
+        .modal.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: var(--dark-grey); padding: 40px; border: 1px solid var(--quantum-blue);
+            width: 90%; max-width: 800px; transform: scale(0.9);
+            transition: transform var(--transition-speed) ease;
+        }
+        .modal.active .modal-content { transform: scale(1); }
+        .modal-content h2 { font-family: 'Orbitron', sans-serif; color: var(--quantum-blue); margin-bottom: 15px; }
+        .modal-content p { line-height: 1.7; margin-bottom: 20px; }
+        .modal-close {
+            position: absolute; top: 20px; right: 20px; background: none; border: none;
+            color: var(--off-white); font-size: 2rem; cursor: pointer;
+        }
+        
+        /* --- Experience Section --- */
+        .timeline { position: relative; width: 100%; max-width: 1000px; padding: 50px 0; }
+        .timeline::after {
+            content: ''; position: absolute; width: 2px; background: linear-gradient(var(--quantum-blue), var(--magenta-pink));
+            top: 0; bottom: 0; left: 50%; margin-left: -1px;
+            box-shadow: 0 0 10px var(--quantum-blue);
+            animation: timeline-glow 3s linear infinite alternate;
+        }
+        @keyframes timeline-glow {
+            from { box-shadow: 0 0 10px var(--quantum-blue), 0 0 20px var(--quantum-blue); }
+            to { box-shadow: 0 0 10px var(--magenta-pink), 0 0 20px var(--magenta-pink); }
+        }
+        .timeline-item { padding: 10px 40px; position: relative; background-color: inherit; width: 50%; }
+        .timeline-item::after {
+            content: ''; position: absolute; width: 25px; height: 25px; right: -13px;
+            background-color: var(--pitch-black); border: 4px solid var(--quantum-blue);
+            top: 25px; border-radius: 50%; z-index: 1; transition: all var(--transition-speed);
+        }
+        .timeline-item.show::after { transform: scale(1); }
+        .timeline-item::after { transform: scale(0); }
+        .timeline-item.left { left: 0; }
+        .timeline-item.right { left: 50%; }
+        .timeline-item.right::after { left: -13px; }
+        .timeline-content {
+            padding: 20px 30px; background-color: var(--dark-grey);
+            position: relative; cursor: pointer; transition: all var(--transition-speed);
+        }
+        .timeline-content:hover { box-shadow: 0 0 20px rgba(0, 246, 255, 0.4); transform: translateY(-5px); }
+        .timeline-content h3 { font-family: 'Orbitron', sans-serif; margin-bottom: 5px; }
+        .timeline-content .date { color: var(--quantum-blue); font-size: 0.9rem; margin-bottom: 10px; display: block; }
+        .timeline-details { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-out; }
+        .timeline-details.active { margin-top: 15px; max-height: 500px; }
+        .timeline-details ul { list-style: none; }
+        .timeline-details li::before { content: '» '; color: var(--quantum-blue); }
+
+        /* --- Contact Section --- */
+        #contact { text-align: center; }
+        #contact h2 { font-family: 'Orbitron', sans-serif; font-size: clamp(2.5rem, 6vw, 4rem); margin-bottom: 20px; }
+        #contact p { max-width: 600px; margin-bottom: 40px; line-height: 1.7; margin-inline: auto; } /* Centering Fix */
+        .contact-email {
+            display: inline-block; background: var(--dark-grey); padding: 15px 30px;
+            border: 1px solid var(--quantum-blue); font-size: 1.2rem;
+            cursor: pointer; margin-bottom: 50px; transition: all var(--transition-speed);
+        }
+        .contact-email:hover { background: var(--quantum-blue); color: var(--pitch-black); box-shadow: 0 0 20px var(--quantum-blue); }
+        .contact-links { display: flex; justify-content: center; gap: 40px; }
+        .contact-links a {
+            color: var(--off-white); font-size: 2.5rem;
+            transition: all var(--transition-speed); position: relative;
+        }
+        .contact-links a:hover { color: var(--quantum-blue); transform: scale(1.1) rotate(-5deg); text-shadow: 0 0 15px var(--quantum-blue); }
+
+        /* --- Utility & Animation Classes --- */
+        @keyframes scan-in {
+            from { opacity: 0; filter: blur(10px); clip-path: inset(0 100% 0 0); }
+            to { opacity: 1; filter: blur(0); clip-path: inset(0 0 0 0); }
+        }
+        .hidden { opacity: 0; }
+        .show { animation: scan-in 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="background-canvas"></canvas>
+
+    <!-- Hero Section -->
+    <section id="hero" class="section">
+        <div class="boot-container">
+            <pre id="ascii-art"></pre>
+            <div id="boot-log"></div>
+            <div id="superposition-state">CURRENT STATE: <span>ENGINEER</span></div>
+            <div id="deobfuscate-container">
+                <p id="deobfuscate-text"></p>
+            </div>
+        </div>
+        <div id="scroll-indicator">▽</div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="section">
+        <h2 class="section-title hidden">> CORE DIRECTIVES</h2>
+        <div class="skills-grid">
+            <div class="skill-card skill-card-quantum hidden" data-skill="quantum" style="animation-delay: 100ms;">
+                <canvas id="bloch-canvas"></canvas>
+                <h3>Quantum Engineering</h3>
+                <p>Solving the Schrödinger equation and simulating quantum phenomena.</p>
+            </div>
+            <div class="skill-card hidden" data-skill="ai" style="animation-delay: 200ms;"><div class="skill-icon">🧠</div><h3>AI & Machine Learning</h3><p>Developing & deploying predictive models.</p></div>
+            <div class="skill-card hidden" data-skill="systems" style="animation-delay: 300ms;"><div class="skill-icon">++</div><h3>C++</h3><p>Performance-critical applications.</p></div>
+            <div class="skill-card hidden" data-skill="systems" style="animation-delay: 400ms;"><div class="skill-icon">⚙️</div><h3>Assembly (x86/x64)</h3><p>Low-level optimization.</p></div>
+            <div class="skill-card hidden" data-skill="web" style="animation-delay: 500ms;"><div class="skill-icon">☁️</div><h3>AWS & Docker</h3><p>Cloud deployment.</p></div>
+            <div class="skill-card hidden" data-skill="systems" style="animation-delay: 600ms;"><div class="skill-icon">🐧</div><h3>Linux Server</h3><p>Configuration & admin.</p></div>
+            <div class="skill-card hidden" data-skill="web" style="animation-delay: 700ms;"><div class="skill-icon">⚛️</div><h3>React & Next.js</h3><p>Full-stack web apps.</p></div>
+        </div>
+    </section>
+    
+    <!-- Projects Section -->
+    <section id="projects" class="section">
+        <h2 class="section-title hidden">> EXECUTED PROGRAMS</h2>
+        <div class="projects-grid">
+            <div class="project-card project-card-schrodinger hidden" data-project-skill="quantum" style="animation-delay: 100ms;">
+                <div class="project-card-visual">
+                    <canvas id="schrodinger-canvas"></canvas>
+                </div>
+                <h3>Live: Schrödinger's Wavefunction in a Fractal Potential</h3>
+                <p>A real-time, scientifically-grounded simulation of a quantum particle. This canvas is not a video; it's actively solving the 2D time-dependent Schrödinger equation using an FDTD method to model superposition, quantum tunneling, and interference within a procedurally generated potential energy landscape.</p>
+                <button class="project-button" data-modal="schrodinger-modal">View Scientific Details</button>
+            </div>
+            <div class="project-card hidden" data-project-skill="ai web" style="animation-delay: 300ms;">
+                 <div class="project-card-visual" style="background-image: radial-gradient(circle, #333 1px, transparent 1px); background-size: 10px 10px;"></div>
+                <h3>Full-Stack AI Auto-Scheduler</h3>
+                <p>Developed for a national service provider to predict staffing needs using a custom ML model on a React/Node.js stack, deployed with Docker on AWS.</p>
+                <button class="project-button" data-modal="ai-modal">Declassify</button>
+            </div>
+            <div class="project-card hidden" data-project-skill="systems" style="animation-delay: 500ms;">
+                 <div class="project-card-visual" style="background: repeating-linear-gradient(45deg, #111, #111 10px, #151515 10px, #151515 20px);"></div>
+                <h3>AMDRyzer Optimization Tool</h3>
+                <p>Low-level system optimization tool using x64 assembly language, featuring AVX2/AVX-512 routines for memory testing and tuning on AMD Ryzen CPUs.</p>
+                <button class="project-button" data-modal="amd-modal">Access Core</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="section">
+         <h2 class="section-title hidden">> FIELD DEPLOYMENTS</h2>
+         <div class="timeline">
+            <div class="timeline-item left hidden"><div class="timeline-content"><h3>Technician & Sales Associate</h3><span class="date">Confidential Electronics Repair Center (Apr 2025 - Present)</span><div class="timeline-details"><ul><li>Diagnose and repair 200+ devices monthly.</li><li>Provide expert technical consultations.</li><li>Manage front-desk operations.</li></ul></div></div></div>
+            <div class="timeline-item right hidden"><div class="timeline-content"><h3>Team Member</h3><span class="date">Quick Quack Car Wash, Murrieta, CA (Oct 2023 - Present)</span><div class="timeline-details"><ul><li>Provided on-site technical support for POS and equipment upkeep.</li><li>Assisted management with operations.</li></ul></div></div></div>
+            <div class="timeline-item left hidden"><div class="timeline-content"><h3>Computer Repair Technician</h3><span class="date">Geek Squad, Best Buy (Apr 2022 - Aug 2023)</span><div class="timeline-details"><ul><li>Repaired PCs, Macs, and mobile devices, achieving a 95% fix rate.</li><li>Conducted hardware diagnostics, data migrations, and OS updates.</li></ul></div></div></div>
+         </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section">
+        <div class="hidden">
+            <h2>ESTABLISH CONNECTION</h2>
+            <p>I am actively seeking challenging opportunities where I can apply my expertise in quantum computing, AI, and low-level systems to build the future of technology. Let's create something remarkable together.</p>
+            <div id="email-button" class="contact-email" title="Click to copy">kamosar@outlook.com</div>
+            <div class="contact-links">
+                <a href="https://linkedin.com/in/ryan-kamosa" target="_blank" title="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></a>
+                <a href="https://github.com/DeltaEpiales" target="_blank" title="GitHub"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.91 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
+                <a href="#" id="download-resume" download="RyanKamosa_Resume.pdf" title="Download Resume PDF"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21l-8-9h6v-12h4v12h6l-8 9zm9-1v2h-18v-2h18z"/></svg></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modals -->
+    <div id="schrodinger-modal" class="modal"><div class="modal-content"><button class="modal-close">&times;</button><h2 style="color:var(--magenta-pink);">Schrödinger Equation Simulation</h2><p>This visualization models the foundational equation of quantum mechanics for a single, non-relativistic particle. It uses the <b>Finite-Difference Time-Domain (FDTD)</b> method, a standard numerical technique, to iteratively solve the 2D time-dependent Schrödinger equation. The environment is defined by a fractal potential energy field, creating barriers and channels that influence the wavefunction's evolution. The simulation demonstrates core quantum phenomena like superposition, quantum tunneling, and interference. The brightness of a pixel corresponds to the probability density of finding the particle, while the hue represents the phase of the complex wavefunction.</p></div></div>
+    <div id="ai-modal" class="modal"><div class="modal-content"><button class="modal-close">&times;</button><h2>Full-Stack AI Auto-Scheduler</h2><p>Architected and developed a full-stack dashboard for a national service provider. The application features a React/Next.js frontend and a Node.js backend. The core of the project is a machine learning model integrated to predict optimal staffing levels based on historical data, weather patterns, and local events. The entire system was containerized with Docker and deployed on Amazon Web Services (AWS) for scalability and reliability.</p></div></div>
+    <div id="amd-modal" class="modal"><div class="modal-content"><button class="modal-close">&times;</button><h2>AMDRyzer Assembly Optimization Tool</h2><p>Authored advanced x64 assembly language routines for memory testing and performance tuning on AMD Ryzen processors. The tool includes specialized implementations for AVX2/AVX-512 instruction sets to maximize memory bandwidth and reduce latency. Also engineered a boot sector management system and real-time monitoring capabilities, which demonstrated a 12% improvement in operational throughput in benchmark tests. This project shows deep system architecture knowledge and the ability to write highly performant, bare-metal code.</p></div></div>
+
+    <!-- Main JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Sound Engine ---
+            const synth = new Tone.Synth().toDestination();
+            const clickSound = () => synth.triggerAttackRelease("C2", "8n", Tone.now());
+            const openSound = () => synth.triggerAttackRelease("C4", "16n", Tone.now());
+
+            // --- Mouse-Reactive Background ---
+            const bgCanvas = document.getElementById('background-canvas');
+            const bgCtx = bgCanvas.getContext('2d');
+            let stars = []; let mouse = { x: null, y: null };
+            window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+            function resizeBgCanvas() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; stars = []; for(let i=0; i<300; i++) stars.push({x:Math.random()*bgCanvas.width, y:Math.random()*bgCanvas.height, z:Math.random()});}
+            resizeBgCanvas(); window.addEventListener('resize', resizeBgCanvas);
+            function animateBg() {
+                bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height); bgCtx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                stars.forEach(s => { s.x -= s.z * 0.1; if(s.x < 0) s.x = bgCanvas.width;
+                    if(mouse.x){ const dx=s.x-mouse.x, dy=s.y-mouse.y; const dist=Math.sqrt(dx*dx+dy*dy); if(dist<100){s.x+=dx/dist*2; s.y+=dy/dist*2;}}
+                    bgCtx.beginPath(); bgCtx.arc(s.x, s.y, s.z*1.5, 0, Math.PI*2); bgCtx.fill();
+                }); requestAnimationFrame(animateBg);
+            } animateBg();
+
+            // --- Hero Boot Animation ---
+            const bootLogEl = document.getElementById('boot-log');
+            const deobfuscateTextEl = document.getElementById('deobfuscate-text');
+            const bootLogLines = ['INITIALIZING RYAN KAMOSA...', `STATUS: <span>ONLINE</span>`, `LOCATION: <span>FRENCH VALLEY, CA</span>`, `TIMESTAMP: <span>${new Date().toString().match(/([A-Z][a-z]+ ){2}[0-9]+ [0-9]+[^ ]+/)[0]}</span>`, 'LOADING MODULES:', 'Quantum Engineering & Algorithms <span class="progress-bar">[▓▓▓▓▓▓▓▓▓▓] 100%</span>', 'AI & Machine Learning <span class="progress-bar">[▓▓▓▓▓▓▓▓▓▓] 100%</span>', 'Low-Level System Architecture <span class="progress-bar">[▓▓▓▓▓▓▓▓▓▓] 100%</span>', '', '<span>QUANTUM STATE INITIALIZED. SYSTEM COHERENT.</span>'];
+            let lineIndex = 0;
+            function nextLine() { if(lineIndex < bootLogLines.length) { const p = document.createElement('p'); p.className = 'boot-log-entry'; p.innerHTML = bootLogLines[lineIndex]; bootLogEl.appendChild(p); lineIndex++; setTimeout(nextLine, Math.random()*50+20);} else { startSuperposition(); } }
+            function startSuperposition() {
+                const stateSpan = document.querySelector('#superposition-state span');
+                const states = ['ENGINEER', 'DEVELOPER', 'PHYSICIST', 'RESEARCHER']; let i = 0, cycleCount = 0;
+                const cycleInterval = setInterval(() => { stateSpan.textContent = states[i++ % states.length]; cycleCount++; if(cycleCount > 20){clearInterval(cycleInterval); stateSpan.textContent = 'ENGINEER'; startDeobfuscation();}}, 80);
+            }
+            function startDeobfuscation() {
+                document.getElementById('deobfuscate-container').style.opacity = '1'; const chars = '!<>-_\\/[]{}—=+*^?#'; let iteration = 0;
+                const deobfuscateFinalText = "Welcome. I'm Ryan Kamosa. I build intelligent systems that bridge the gap between classical and quantum computing. My work exists in a superposition of hardware optimization, AI development, and quantum theory.\n\nScroll down to decohere my capabilities.";
+                const interval = setInterval(() => {
+                    deobfuscateTextEl.innerHTML = deobfuscateFinalText.split('').map((_, index) => (index < iteration) ? deobfuscateFinalText[index] : `<span style="color:hsla(${Math.random()*360}, 100%, 70%, 1)">${chars[Math.floor(Math.random() * chars.length)]}</span>`).join('');
+                    if(iteration >= deobfuscateFinalText.length){ clearInterval(interval); deobfuscateTextEl.textContent = deobfuscateFinalText; }
+                    iteration += 1 / 2;
+                }, 30);
+            }
+            setTimeout(() => { document.getElementById('ascii-art').style.opacity = '1'; setTimeout(nextLine, 500); }, 500);
+
+            // --- Intersection Observer ---
+            const observer = new IntersectionObserver((entries) => { entries.forEach((entry) => { if (entry.isIntersecting) entry.target.classList.add('show'); }); }, { threshold: 0.1 });
+            document.querySelectorAll('.hidden').forEach((el) => observer.observe(el));
+
+            // --- Modal Logic & Sound ---
+            document.querySelectorAll('.project-button').forEach(b => b.addEventListener('click', () => { openSound(); document.getElementById(b.dataset.modal).classList.add('active'); }));
+            document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', (e) => (e.target === m || e.target.classList.contains('modal-close')) ? m.classList.remove('active') : null));
+            document.querySelectorAll('.timeline-content, .contact-links a, #email-button').forEach(el => el.addEventListener('click', () => clickSound()));
+            
+            // --- 3D Project Card Tilt ---
+            document.querySelectorAll('.project-card').forEach(card => {
+                card.addEventListener('mousemove', e => {
+                    const rect = card.getBoundingClientRect(); const x = e.clientX-rect.left; const y = e.clientY-rect.top;
+                    const rotateY = -1*((x-rect.width/2)/rect.width)*20; const rotateX = ((y-rect.height/2)/rect.height)*20;
+                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+                }); card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+            });
+            
+            // --- Skills to Project Filtering ---
+            const skillCards = document.querySelectorAll('.skill-card');
+            const projectCards = document.querySelectorAll('.project-card');
+            let activeFilter = null;
+            skillCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    clickSound(); const skill = card.dataset.skill;
+                    if (activeFilter === skill) { activeFilter = null; card.classList.remove('active-filter'); projectCards.forEach(p => p.classList.remove('filtered-out'));
+                    } else { activeFilter = skill; skillCards.forEach(s => s.classList.remove('active-filter')); card.classList.add('active-filter');
+                        projectCards.forEach(p => p.classList.toggle('filtered-out', !p.dataset.projectSkill.split(' ').includes(skill)));
+                    }
+                });
+            });
+
+            // --- 3D Bloch Sphere Canvas ---
+            const blochCanvas = document.getElementById('bloch-canvas');
+            if (blochCanvas && window.THREE) {
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, blochCanvas.clientWidth / blochCanvas.clientHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas: blochCanvas, alpha: true });
+                renderer.setSize(blochCanvas.clientWidth, blochCanvas.clientHeight);
+                camera.position.z = 2.5;
+
+                const sphereGeom = new THREE.SphereGeometry(1, 32, 32);
+                const sphereMat = new THREE.MeshBasicMaterial({ color: 0x00F6FF, transparent: true, opacity: 0.15, wireframe: true });
+                const sphere = new THREE.Mesh(sphereGeom, sphereMat);
+                scene.add(sphere);
+
+                const arrow = new THREE.ArrowHelper(new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 1.2, 0xFF00FF, 0.2, 0.1);
+                scene.add(arrow);
+
+                let angle = 0;
+                function animateBloch() {
+                    requestAnimationFrame(animateBloch);
+                    angle += 0.01;
+                    const theta = Math.PI/3 + Math.cos(angle*0.5)*0.2; // Polar angle
+                    const phi = angle; // Azimuthal angle
+                    arrow.setDirection(new THREE.Vector3(Math.sin(theta)*Math.cos(phi), Math.cos(theta), Math.sin(theta)*Math.sin(phi)));
+                    sphere.rotation.y += 0.005;
+                    renderer.render(scene, camera);
+                } animateBloch();
+            }
+
+            // --- Schrödinger Simulation Mini-Canvas ---
+            const schrodingerCanvas = document.getElementById('schrodinger-canvas');
+            if (schrodingerCanvas) {
+                const s_ctx = schrodingerCanvas.getContext('2d'), S_RESOLUTION=8, s_cols=Math.floor(schrodingerCanvas.clientWidth/S_RESOLUTION), s_rows=Math.floor(schrodingerCanvas.clientHeight/S_RESOLUTION);
+                schrodingerCanvas.width=s_cols; schrodingerCanvas.height=s_rows; let s_psi_re=new Float32Array(s_cols*s_rows).fill(0), s_psi_im=new Float32Array(s_cols*s_rows).fill(0), s_potential=new Float32Array(s_cols*s_rows).fill(0);
+                for(let i=0;i<s_cols*s_rows;i++){const x=i%s_cols-s_cols/2, y=Math.floor(i/s_cols)-s_rows/2;s_potential[i]=(x*x+y*y<(s_cols/4)**2)?0:5} const cx=s_cols/2,cy=s_rows/2,sig=s_cols/8,kx=1.5; let norm=0;
+                for(let i=0;i<s_cols*s_rows;i++){const x=i%s_cols,y=Math.floor(i/s_cols);const exp_arg=-(((x-cx)*(x-cx)+(y-cy)*(y-cy))/(2*sig*sig));s_psi_re[i]=Math.exp(exp_arg)*Math.cos(kx*(x-cx));s_psi_im[i]=Math.exp(exp_arg)*Math.sin(kx*(x-cx));norm+=s_psi_re[i]*s_psi_re[i]+s_psi_im[i]*s_psi_im[i]} norm=Math.sqrt(norm); if(norm>0)for(let i=0;i<s_cols*s_rows;i++){s_psi_re[i]/=norm;s_psi_im[i]/=norm}
+                function s_update(){for(let x=1;x<s_cols-1;x++)for(let y=1;y<s_rows-1;y++){const i=y*s_cols+x;const lap_re=s_psi_re[i+1]+s_psi_re[i-1]+s_psi_re[i+s_cols]+s_psi_re[i-s_cols]-4*s_psi_re[i];s_psi_im[i]-=0.005*(lap_re-2*s_potential[i]*s_psi_re[i])} for(let x=1;x<s_cols-1;x++)for(let y=1;y<s_rows-1;y++){const i=y*s_cols+x;const lap_im=s_psi_im[i+1]+s_psi_im[i-1]+s_psi_im[i+s_cols]+s_psi_im[i-s_cols]-4*s_psi_im[i];s_psi_re[i]+=0.005*(lap_im-2*s_potential[i]*s_psi_im[i])}}
+                function s_draw(){const imgData=s_ctx.getImageData(0,0,s_cols,s_rows);for(let i=0;i<s_cols*s_rows;i++){const prob=s_psi_re[i]*s_psi_re[i]+s_psi_im[i]*s_psi_im[i];const phase=Math.atan2(s_psi_im[i],s_psi_re[i]);const hue=(phase+Math.PI)/(2*Math.PI);const light=Math.min(prob*5e3,1);const[r,g,b]=hslToRgb(hue,1,light*.5);imgData.data[i*4]=r;imgData.data[i*4+1]=g;imgData.data[i*4+2]=b;imgData.data[i*4+3]=255} s_ctx.putImageData(imgData,0,0)}
+                function hslToRgb(h,s,l){let r,g,b;if(s==0){r=g=b=l}else{const q=l<0.5?l*(1+s):l+s-l*s;const p=2*l-q;const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p};r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3)}return[r*255,g*255,b*255]}
+                function s_animate(){s_update();s_draw();requestAnimationFrame(s_animate)} s_animate();
+            }
+        });
+    </script>
+</body>
+</html>
